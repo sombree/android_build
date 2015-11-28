@@ -18,7 +18,10 @@
 # to products that have telephony hardware.
 
 PRODUCT_PACKAGES := \
+    CarrierConfig \
     Dialer \
+    CallLogBackup \
+    InCallUI \
     Mms \
     rild
 

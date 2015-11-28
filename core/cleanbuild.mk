@@ -132,23 +132,11 @@ endif  # if not ONE_SHOT_MAKEFILE dont_bother
 
 previous_build_config_file := $(PRODUCT_OUT)/previous_build_config.mk
 
-# TODO: this special case for the sdk is only necessary while "sdk"
-# is a valid make target.  Eventually, it will just be a product, at
-# which point TARGET_PRODUCT will handle it and we can avoid this check
-# of MAKECMDGOALS.  The "addprefix" is just to keep things pretty.
-ifneq ($(TARGET_PRODUCT),sdk)
-  building_sdk := $(addprefix -,$(filter sdk,$(MAKECMDGOALS)))
-else
-  # Don't bother with this extra part when explicitly building the sdk product.
-  building_sdk :=
-endif
-
 # A change in the list of aapt configs warrants an installclean, too.
 aapt_config_list := $(strip $(PRODUCT_AAPT_CONFIG) $(PRODUCT_AAPT_PREF_CONFIG))
 
 current_build_config := \
-    $(TARGET_PRODUCT)-$(TARGET_BUILD_VARIANT)$(building_sdk)-{$(aapt_config_list)}
-building_sdk :=
+    $(TARGET_PRODUCT)-$(TARGET_BUILD_VARIANT)-{$(aapt_config_list)}
 aapt_config_list :=
 force_installclean := false
 
@@ -206,6 +194,7 @@ installclean_files := \
 	$(PRODUCT_OUT)/*.xlb \
 	$(PRODUCT_OUT)/*.zip \
 	$(PRODUCT_OUT)/kernel \
+	$(PRODUCT_OUT)/*.zip.md5sum \
 	$(PRODUCT_OUT)/data \
 	$(PRODUCT_OUT)/skin \
 	$(PRODUCT_OUT)/obj/APPS \
@@ -214,10 +203,13 @@ installclean_files := \
 	$(PRODUCT_OUT)/recovery \
 	$(PRODUCT_OUT)/root \
 	$(PRODUCT_OUT)/system \
+	$(PRODUCT_OUT)/vendor \
+	$(PRODUCT_OUT)/oem \
 	$(PRODUCT_OUT)/dex_bootjars \
 	$(PRODUCT_OUT)/obj/JAVA_LIBRARIES \
 	$(PRODUCT_OUT)/obj/FAKE \
 	$(PRODUCT_OUT)/obj/EXECUTABLES/adbd_intermediates \
+	$(PRODUCT_OUT)/obj/STATIC_LIBRARIES/libfs_mgr_intermediates \
 	$(PRODUCT_OUT)/obj/EXECUTABLES/init_intermediates \
 	$(PRODUCT_OUT)/obj/ETC/mac_permissions.xml_intermediates \
 	$(PRODUCT_OUT)/obj/ETC/sepolicy_intermediates \
@@ -241,13 +233,13 @@ endif
 dataclean: FILES := $(dataclean_files)
 dataclean:
 	$(hide) rm -rf $(FILES)
-	@echo "Deleted emulator userdata images."
+	@echo -e ${CL_GRN}"Deleted emulator userdata images."${CL_RST}
 
 .PHONY: installclean
 installclean: FILES := $(installclean_files)
 installclean: dataclean
 	$(hide) rm -rf $(FILES)
-	@echo "Deleted images and staging directories."
+	@echo -e ${CL_GRN}"Deleted images and staging directories."${CL_RST}
 
 ifeq "$(force_installclean)" "true"
   $(info *** Forcing "make installclean"...)
@@ -256,3 +248,63 @@ ifeq "$(force_installclean)" "true"
   $(info *** Done with the cleaning, now starting the real build.)
 endif
 force_installclean :=
+
+###########################################################
+# Clean build tools when swithcing between prebuilt host tools (such as in
+# apps_only build) and tools built from source (platform build).
+previous_prebuilt_tools_config_file := $(HOST_OUT)/previous_prebuilt_tools_config.mk
+ifneq (,$(TARGET_BUILD_APPS)$(filter true,$(TARGET_BUILD_PDK)))
+current_prebuilt_tools := true
+else
+current_prebuilt_tools := false
+endif
+PREVIOUS_PREBUILT_TOOLS :=
+-include $(previous_prebuilt_tools_config_file)
+force_tools_clean :=
+ifdef PREVIOUS_PREBUILT_TOOLS
+ifneq ($(PREVIOUS_PREBUILT_TOOLS),$(current_prebuilt_tools))
+force_tools_clean := true
+endif
+endif # else, this is the first build, so no need to clean.
+
+# Write the new state to the file.
+$(shell \
+  mkdir -p $(dir $(previous_prebuilt_tools_config_file)) && \
+  echo "PREVIOUS_PREBUILT_TOOLS:=$(current_prebuilt_tools)" > \
+    $(previous_prebuilt_tools_config_file))
+
+ifeq ($(force_tools_clean),true)
+# For this list of prebuilt tools, see prebuilts/sdk/tools/Android.mk.
+tools_clean_files := \
+  $(HOST_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/signapk_intermediates \
+  $(HOST_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/dx_intermediates \
+  $(HOST_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/shrinkedAndroid_intermediates \
+  $(HOST_OUT)/obj*/EXECUTABLES/aapt_intermediates \
+  $(HOST_OUT)/obj*/EXECUTABLES/aidl_intermediates \
+  $(HOST_OUT)/obj*/EXECUTABLES/zipalign_intermediates \
+  $(HOST_OUT)/obj*/lib/libc++$(HOST_SHLIB_SUFFIX) \
+
+$(info *** build type changed, clean host tools...)
+$(info *** rm -rf $(tools_clean_files))
+$(shell rm -rf $(tools_clean_files))
+endif
+
+###########################################################
+
+.PHONY: clean-jack-files
+clean-jack-files: clean-dex-files
+	$(hide) find $(OUT_DIR) -name "*.jack" | xargs rm -f
+	$(hide) find $(OUT_DIR) -type d -name "jack" | xargs rm -rf
+	@echo "All jack files have been removed."
+
+.PHONY: clean-dex-files
+clean-dex-files:
+	$(hide) find $(OUT_DIR) -name "*.dex" ! -path "*/jack-incremental/*" | xargs rm -f
+	$(hide) for i in `find $(OUT_DIR) -name "*.jar" -o -name "*.apk"` ; do ((unzip -l $$i 2> /dev/null | \
+				grep -q "\.dex$$" && rm -f $$i) || continue ) ; done
+	@echo "All dex files and archives containing dex files have been removed."
+
+.PHONY: clean-jack-incremental
+clean-jack-incremental:
+	$(hide) find $(OUT_DIR) -name "jack-incremental" -type d | xargs rm -rf
+	@echo "All jack incremental dirs have been removed."

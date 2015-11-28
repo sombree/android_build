@@ -18,6 +18,9 @@
 PRODUCT_PACKAGES += \
     20-dns.conf \
     95-configured \
+    org.apache.http.legacy.boot \
+    appwidget \
+    appops \
     am \
     android.policy \
     android.test.runner \
@@ -30,12 +33,12 @@ PRODUCT_PACKAGES += \
     dhcpcd \
     dhcpcd-run-hooks \
     dnsmasq \
+    dpm \
     framework \
-    framework2 \
     fsck_msdos \
+    hid \
     ime \
     input \
-    inputflinger \
     javax.obex \
     libandroid \
     libandroid_runtime \
@@ -48,6 +51,7 @@ PRODUCT_PACKAGES += \
     libcamera_client \
     libcameraservice \
     libdl \
+    libdrmclearkeyplugin \
     libeffectproxy \
     libeffects \
     libinput \
@@ -63,12 +67,16 @@ PRODUCT_PACKAGES += \
     libnetlink \
     libnetutils \
     libpdfium \
+    libradio \
+    libradioservice \
+    libradio_metadata \
     libreference-ril \
     libreverbwrapper \
     libril \
     librtp_jni \
     libsensorservice \
     libskia \
+    libsonic \
     libsonivox \
     libsoundpool \
     libsoundtrigger \
@@ -93,7 +101,6 @@ PRODUCT_PACKAGES += \
     monkey \
     mtpd \
     ndc \
-    netcfg \
     netd \
     ping \
     ping6 \
@@ -104,13 +111,27 @@ PRODUCT_PACKAGES += \
     run-as \
     schedtest \
     sdcard \
+    secdiscard \
     services \
     settings \
+    sgdisk \
+    sm \
     svc \
     tc \
+    telecom \
+    tm \
     vdc \
     vold \
     wm
+
+
+PRODUCT_COPY_FILES := $(call add-to-product-copy-files-if-exists,\
+    frameworks/base/preloaded-classes:system/etc/preloaded-classes)
+
+# Note: it is acceptable to not have a compiled-classes file. In that case, all boot classpath
+#       classes will be compiled.
+PRODUCT_COPY_FILES += $(call add-to-product-copy-files-if-exists,\
+    frameworks/base/compiled-classes:system/etc/compiled-classes)
 
 
 $(call inherit-product, $(SRC_TARGET_DIR)/product/embedded.mk)

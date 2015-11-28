@@ -19,6 +19,7 @@
 
 PRODUCT_PACKAGES := \
     Bluetooth \
+    BluetoothMidiService \
     Camera2 \
     Gallery2 \
     Music \
@@ -29,19 +30,14 @@ PRODUCT_PACKAGES := \
     WallpaperCropper
 
 PRODUCT_PACKAGES += \
-    bcc \
     clatd \
     clatd.conf \
+    javax.btobex \
     pppd \
     screenrecord
 
 PRODUCT_PACKAGES += \
-    librs_jni \
-    libvideoeditor_jni \
-    libvideoeditor_core \
-    libvideoeditor_osal \
-    libvideoeditor_videofilters \
-    libvideoeditorplayer \
+    librs_jni
 
 PRODUCT_PACKAGES += \
     audio.primary.default \
@@ -49,9 +45,6 @@ PRODUCT_PACKAGES += \
     local_time.default \
     vibrator.default \
     power.default
-
-PRODUCT_PACKAGES += \
-    local_time.default
 
 PRODUCT_COPY_FILES := \
         frameworks/av/media/libeffects/data/audio_effects.conf:system/etc/audio_effects.conf
@@ -63,8 +56,11 @@ $(call inherit-product-if-exists, frameworks/base/data/fonts/fonts.mk)
 $(call inherit-product-if-exists, external/google-fonts/dancing-script/fonts.mk)
 $(call inherit-product-if-exists, external/google-fonts/carrois-gothic-sc/fonts.mk)
 $(call inherit-product-if-exists, external/google-fonts/coming-soon/fonts.mk)
+$(call inherit-product-if-exists, external/google-fonts/cutive-mono/fonts.mk)
 $(call inherit-product-if-exists, external/noto-fonts/fonts.mk)
 $(call inherit-product-if-exists, external/naver-fonts/fonts.mk)
+$(call inherit-product-if-exists, external/roboto-fonts/fonts.mk)
+$(call inherit-product-if-exists, external/hyphenation-patterns/patterns.mk)
 $(call inherit-product-if-exists, frameworks/base/data/keyboards/keyboards.mk)
 $(call inherit-product-if-exists, frameworks/webview/chromium/chromium.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/core.mk)

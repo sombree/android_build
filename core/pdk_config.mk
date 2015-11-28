@@ -52,19 +52,20 @@ ifneq (,$(filter platform-java, $(MAKECMDGOALS))$(PDK_FUSION_PLATFORM_ZIP))
 # For these dirs, add classes.jar and javalib.jar from the dir to platform.zip
 # all paths under out dir
 PDK_PLATFORM_JAVA_ZIP_JAVA_TARGET_LIB_DIR += \
-	target/common/obj/JAVA_LIBRARIES/android_stubs_current_intermediates \
-	target/common/obj/JAVA_LIBRARIES/core-libart_intermediates \
-	target/common/obj/JAVA_LIBRARIES/core-junit_intermediates \
-	target/common/obj/JAVA_LIBRARIES/ext_intermediates \
-	target/common/obj/JAVA_LIBRARIES/framework_intermediates \
-	target/common/obj/JAVA_LIBRARIES/framework2_intermediates \
-	target/common/obj/JAVA_LIBRARIES/android.test.runner_intermediates \
-	target/common/obj/JAVA_LIBRARIES/telephony-common_intermediates \
-	target/common/obj/JAVA_LIBRARIES/voip-common_intermediates \
-	target/common/obj/JAVA_LIBRARIES/ims-common_intermediates \
-	target/common/obj/JAVA_LIBRARIES/mms-common_intermediates \
-	target/common/obj/JAVA_LIBRARIES/android-ex-camera2_intermediates \
-	target/common/obj/JAVA_LIBRARIES/android-common_intermediates \
+  target/common/obj/JAVA_LIBRARIES/android.test.runner_intermediates \
+  target/common/obj/JAVA_LIBRARIES/android-common_intermediates \
+  target/common/obj/JAVA_LIBRARIES/android-ex-camera2_intermediates \
+  target/common/obj/JAVA_LIBRARIES/android_stubs_current_intermediates \
+  target/common/obj/JAVA_LIBRARIES/bouncycastle_intermediates \
+  target/common/obj/JAVA_LIBRARIES/conscrypt_intermediates \
+  target/common/obj/JAVA_LIBRARIES/core-libart_intermediates \
+  target/common/obj/JAVA_LIBRARIES/core-junit_intermediates \
+  target/common/obj/JAVA_LIBRARIES/ext_intermediates \
+  target/common/obj/JAVA_LIBRARIES/framework_intermediates \
+  target/common/obj/JAVA_LIBRARIES/ims-common_intermediates \
+  target/common/obj/JAVA_LIBRARIES/okhttp_intermediates \
+  target/common/obj/JAVA_LIBRARIES/telephony-common_intermediates \
+  target/common/obj/JAVA_LIBRARIES/voip-common_intermediates \
 
 # not java libraries
 PDK_PLATFORM_JAVA_ZIP_CONTENTS += \
@@ -77,7 +78,7 @@ PDK_PLATFORM_JAVA_ZIP_JAVA_LIB_DIR := \
 	$(PDK_PLATFORM_JAVA_ZIP_JAVA_HOST_LIB_DIR)
 
 PDK_PLATFORM_JAVA_ZIP_CONTENTS += $(foreach lib_dir,$(PDK_PLATFORM_JAVA_ZIP_JAVA_LIB_DIR),\
-    $(lib_dir)/classes.jar $(lib_dir)/javalib.jar)
+    $(lib_dir)/classes.jack $(lib_dir)/classes.jar $(lib_dir)/javalib.jar)
 
 # check and override java support level
 ifneq ($(TARGET_BUILD_PDK)$(PDK_FUSION_PLATFORM_ZIP),)
@@ -115,7 +116,7 @@ endif
 endif
 
 $(_pdk_fusion_stamp) : $(PDK_FUSION_PLATFORM_ZIP)
-	@echo "Unzip $(dir $@) <- $<"
+	@echo -e ${CL_YLW}"Unzip"${CL_RST}" $(dir $@) <- $<"
 	$(hide) rm -rf $(dir $@) && mkdir -p $(dir $@)
 	$(hide) unzip -qo $< -d $(dir $@)
 	$(call split-long-arguments,-touch,$(_pdk_fusion_files))

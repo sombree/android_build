@@ -30,11 +30,16 @@ PRODUCT_PACKAGES += \
     PackageInstaller \
     SettingsProvider \
     Shell \
+    StatementService \
+    bcc \
     bu \
+    com.android.future.usb.accessory \
     com.android.location.provider \
     com.android.location.provider.xml \
     com.android.media.remotedisplay \
     com.android.media.remotedisplay.xml \
+    com.android.mediadrm.signer \
+    com.android.mediadrm.signer.xml \
     drmserver \
     ethernet-service \
     framework-res \
@@ -45,8 +50,10 @@ PRODUCT_PACKAGES += \
     ip-up-vpn \
     ip6tables \
     iptables \
+    gatekeeperd \
     keystore \
     keystore.default \
+    ld.mc \
     libbcc \
     libOpenMAXAL \
     libOpenSLES \
@@ -55,13 +62,13 @@ PRODUCT_PACKAGES += \
     libdrmframework_jni \
     libfilterfw \
     libkeystore \
+    libgatekeeper \
     libsqlite_jni \
     libwilhelm \
     logd \
     make_ext4fs \
     e2fsck \
     resize2fs \
-    mms-common \
     screencap \
     sensorservice \
     telephony-common \
@@ -83,23 +90,31 @@ PRODUCT_BOOT_JARS := \
     bouncycastle \
     ext \
     framework \
-    framework2 \
     telephony-common \
     voip-common \
     ims-common \
-    mms-common \
-    android.policy \
-    services \
     apache-xml \
+    org.apache.http.legacy.boot
+
+# The order of PRODUCT_SYSTEM_SERVER_JARS matters.
+PRODUCT_SYSTEM_SERVER_JARS := \
+    org.cyanogenmod.platform \
+    org.cyanogenmod.hardware \
+    services \
     ethernet-service \
-    webviewchromium \
     wifi-service
 
-PRODUCT_RUNTIMES := runtime_libart_default
+# Adoptable external storage supports both ext4 and f2fs
+PRODUCT_PACKAGES += \
+    e2fsck \
+    make_ext4fs \
+    fsck.f2fs \
+    make_f2fs \
 
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     ro.zygote=zygote32
 PRODUCT_COPY_FILES += \
     system/core/rootdir/init.zygote32.rc:root/init.zygote32.rc
 
+$(call inherit-product, $(SRC_TARGET_DIR)/product/runtime_libart.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/base.mk)
